@@ -4,7 +4,7 @@
 using namespace std;
 
 #define N 100
-#define R 2
+#define R 1.5
 
 typedef struct BSTNode {
 	int value;
@@ -41,7 +41,7 @@ int main() {
 	}
 	*/
 
-	BSTNode *pred = getPred(root, 22);
+	BSTNode *pred = getPred(root, 30);
 	cout << "pred is " << pred->value << endl;
 
 	freeBSTNodes(root);
@@ -120,29 +120,18 @@ int treeSize(BSTNode *node) {
 	* No left subtree, first parent smaller than needle is pred
  */
 BSTNode *getPred(BSTNode *tree, int needle) {
-	cout << "tree value at call is " << tree->value << endl;
-	if (tree == NULL) {
-		cout << "returning null" << endl;
+	if (tree == NULL)
 		return NULL;
-	}
-	if (needle == tree->value) {
-		cout << "found the value" << endl;
-		BSTNode *largestSmaller = largestSubTreeNode(tree->left);
-		cout << "largest elem in left subtree is " << ((largestSmaller == NULL) ? 
-				"null" : to_string(largestSmaller->value)) << endl;
-		return largestSmaller;
-	}
+	if (needle == tree->value)
+		// return largest elem in left subtree
+		return largestSubTreeNode(tree->left);
 	BSTNode *pred;
-	if (needle < tree->value) {
-		cout << "going left" << endl;
+	if (needle < tree->value)
 		pred = getPred(tree->left, needle);
-	}
-	else {
-		cout << "going right" << endl;
+	else
 		pred = getPred(tree->right, needle);
-	}
+	// return pred if found, if not and parent is smaller than needle, parent is pred
 	pred = ((pred != NULL) ? pred : ((tree->value < needle) ? tree : NULL));
-	cout << "returning pred with value " << ((pred == NULL) ? "null" : to_string(pred->value)) << endl;
 	return pred;
 }
 
