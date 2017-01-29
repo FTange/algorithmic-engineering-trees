@@ -13,9 +13,14 @@ typedef struct BSTNode {
 }BSTNode;
 
 BSTNode *constructBST(int *hay, int low, int high);
+BSTNode *constructSkewedBST(int *hay, double skew, int low, int high);
+BSTNode *constructBST(int *hay);
+BSTNode *largestSubTreeNode(BSTNode *node);
+BSTNode *getPred(BSTNode *tree, int needle);
 void freeBSTNodes(BSTNode *node);
 void printBSTInorder(BSTNode *node);
 bool binaryTreeSearch(BSTNode *tree, int needle);
+int treeSize(BSTNode *node);
 
 int main() {
 	int hay[N];
@@ -23,21 +28,49 @@ int main() {
 
 	/* Creates a sorted array with gaps between elements depending on R */
 	for (int i=0, val = 0; i < N; val++) {
-		(rand() > thres) ? hay[i++] = val : val++;
+		(rand() < thres) ? hay[i++] = val : val++;
 	}
 
-	BSTNode *root = constructBST(hay, 0,N-1);
+	BSTNode *root = constructSkewedBST(hay, 0.5, 0,N-1);
+
 	printBSTInorder(root);
+
+	/*
 	for (int i=0; i<N; i++) {
 		cout << i << " is " << (binaryTreeSearch(root,i) ? "" : " not ") << "present" << endl;
 	}
+	*/
+
+	BSTNode *pred = getPred(root, 22);
+	cout << "pred is " << pred->value << endl;
 
 	freeBSTNodes(root);
+}
+
+BSTNode *constructBST(int *hay) {
+	return constructBST(hay, 0, N);
 }
 
 BSTNode *constructBST(int *hay, int low, int high) {
 	if (low <= high) {
 		int mid = (low + high) / 2;
+		BSTNode *node = new BSTNode();
+
+		node->value = hay[mid];
+		node->left = constructBST(hay, low, mid-1);
+		node->right = constructBST(hay, mid+1, high);
+
+		return node;
+	}
+	return NULL;
+}
+
+/*
+ * Double 0 <= skew <= 1 is the proportion of the tree put in left subtree
+ */
+BSTNode *constructSkewedBST(int *hay, double skew, int low, int high) {
+	if (low <= high) {
+		int mid = (low + high) * skew;
 		BSTNode *node = new BSTNode();
 
 		node->value = hay[mid];
@@ -71,4 +104,52 @@ bool binaryTreeSearch(BSTNode *tree, int needle) {
 		return binaryTreeSearch(tree->left, needle);
 	else 
 		return binaryTreeSearch(tree->right, needle);
+}
+
+int treeSize(BSTNode *node) {
+	if (node == NULL) return 0;
+	int size = 1 + treeSize(node->left) + treeSize(node->right);
+	return size;
+}
+
+/*
+ * We did find the needle:
+	* Rightmost leaf in left subtree is pred
+	* If no left subtree, pred is the first parent smaller than needle
+ * We didn't find the needle:
+	* No left subtree, first parent smaller than needle is pred
+ */
+BSTNode *getPred(BSTNode *tree, int needle) {
+	cout << "tree value at call is " << tree->value << endl;
+	if (tree == NULL) {
+		cout << "returning null" << endl;
+		return NULL;
+	}
+	if (needle == tree->value) {
+		cout << "found the value" << endl;
+		BSTNode *largestSmaller = largestSubTreeNode(tree->left);
+		cout << "largest elem in left subtree is " << ((largestSmaller == NULL) ? 
+				"null" : to_string(largestSmaller->value)) << endl;
+		return largestSmaller;
+	}
+	BSTNode *pred;
+	if (needle < tree->value) {
+		cout << "going left" << endl;
+		pred = getPred(tree->left, needle);
+	}
+	else {
+		cout << "going right" << endl;
+		pred = getPred(tree->right, needle);
+	}
+	pred = ((pred != NULL) ? pred : ((tree->value < needle) ? tree : NULL));
+	cout << "returning pred with value " << ((pred == NULL) ? "null" : to_string(pred->value)) << endl;
+	return pred;
+}
+
+BSTNode *largestSubTreeNode(BSTNode *node) {
+	if (node == NULL) return NULL;
+	while (node->right != NULL) {
+		node = node->right;
+	}
+	return node;
 }
