@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <stack>
 
 using namespace std;
 
@@ -17,6 +18,7 @@ BSTNode *constructSkewedBST(int *hay, double skew, int low, int high);
 BSTNode *constructBST(int *hay);
 BSTNode *largestSubTreeNode(BSTNode *node);
 BSTNode *getPred(BSTNode *tree, int needle);
+BSTNode *getPredRec(BSTNode *tree, int needle);
 void freeBSTNodes(BSTNode *node);
 void printBSTInorder(BSTNode *node);
 bool binaryTreeSearch(BSTNode *tree, int needle);
@@ -40,6 +42,7 @@ int main() {
 		cout << i << " is " << (binaryTreeSearch(root,i) ? "" : " not ") << "present" << endl;
 	}
 	*/
+
 
 	BSTNode *pred = getPred(root, 30);
 	cout << "pred is " << pred->value << endl;
@@ -119,19 +122,19 @@ int treeSize(BSTNode *node) {
  * We didn't find the needle:
 	* No left subtree, first parent smaller than needle is pred
  */
-BSTNode *getPred(BSTNode *tree, int needle) {
-	if (tree == NULL)
+BSTNode *getPredRec(BSTNode *node, int needle) {
+	if (node == NULL)
 		return NULL;
-	if (needle == tree->value)
+	if (needle == node->value)
 		// return largest elem in left subtree
-		return largestSubTreeNode(tree->left);
+		return largestSubTreeNode(node->left);
 	BSTNode *pred;
-	if (needle < tree->value)
-		pred = getPred(tree->left, needle);
+	if (needle < node->value)
+		pred = getPred(node->left, needle);
 	else
-		pred = getPred(tree->right, needle);
+		pred = getPred(node->right, needle);
 	// return pred if found, if not and parent is smaller than needle, parent is pred
-	pred = ((pred != NULL) ? pred : ((tree->value < needle) ? tree : NULL));
+	pred = ((pred != NULL) ? pred : ((node->value < needle) ? node : NULL));
 	return pred;
 }
 
@@ -141,4 +144,43 @@ BSTNode *largestSubTreeNode(BSTNode *node) {
 		node = node->right;
 	}
 	return node;
+}
+
+/*
+ * Iterative version of pred
+ * Since pred might be a parent we need them and we can't retreive them since
+ * the pointers are one-way, so thay are saved on a stack and if pred is not in
+ * the left subtree then we find it in the stack.
+ */
+BSTNode *getPred(BSTNode *node, int needle) {
+	stack<BSTNode *> visitedNodes;
+	while (node != NULL) {
+		if (needle == node->value) {
+			if (node->left != NULL) {
+				node = node->left;
+				while (node->right != NULL) {
+					node = node->right;
+					}
+				return node;
+			}
+			break;
+		}
+		if (needle < node->value) {
+			visitedNodes.push(node);
+			node = node->left;
+		}
+		else {
+			visitedNodes.push(node);
+			node = node->right;
+		}
+	}
+	while (!visitedNodes.empty()) {
+		node = visitedNodes.top();
+		// stupid c++
+		visitedNodes.pop();
+		if (node->value < needle) {
+			return node;
+		}
+	}
+	return NULL;
 }
