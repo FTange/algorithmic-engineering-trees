@@ -17,8 +17,9 @@ BSTNode *constructBST(int *hay, int low, int high);
 BSTNode *constructSkewedBST(int *hay, double skew, int low, int high);
 BSTNode *constructBST(int *hay);
 BSTNode *largestSubTreeNode(BSTNode *node);
-BSTNode *getPred(BSTNode *tree, int needle);
+// BSTNode *getPred(BSTNode *tree, int needle);
 BSTNode *getPredRec(BSTNode *tree, int needle);
+int getPred(BSTNode *tree, int needle);
 void freeBSTNodes(BSTNode *node);
 void printBSTInorder(BSTNode *node);
 bool binaryTreeSearch(BSTNode *tree, int needle);
@@ -44,8 +45,8 @@ int main() {
 	*/
 
 
-	BSTNode *pred = getPred(root, 30);
-	cout << "pred is " << pred->value << endl;
+	int pred = getPred(root, 30);
+	cout << "pred is " << pred << endl;
 
 	freeBSTNodes(root);
 }
@@ -130,9 +131,9 @@ BSTNode *getPredRec(BSTNode *node, int needle) {
 		return largestSubTreeNode(node->left);
 	BSTNode *pred;
 	if (needle < node->value)
-		pred = getPred(node->left, needle);
+		pred = getPredRec(node->left, needle);
 	else
-		pred = getPred(node->right, needle);
+		pred = getPredRec(node->right, needle);
 	// return pred if found, if not and parent is smaller than needle, parent is pred
 	pred = ((pred != NULL) ? pred : ((node->value < needle) ? node : NULL));
 	return pred;
@@ -152,6 +153,7 @@ BSTNode *largestSubTreeNode(BSTNode *node) {
  * the pointers are one-way, so thay are saved on a stack and if pred is not in
  * the left subtree then we find it in the stack.
  */
+/*
 BSTNode *getPred(BSTNode *node, int needle) {
 	stack<BSTNode *> visitedNodes;
 	while (node != NULL) {
@@ -183,4 +185,30 @@ BSTNode *getPred(BSTNode *node, int needle) {
 		}
 	}
 	return NULL;
+}
+*/
+
+int getPred(BSTNode *node, int needle) {
+	int possPred = -1;
+	while (node != NULL) {
+		int currVal = node->value;
+		if (needle == currVal) {
+			if (node->left != NULL) {
+				node = node->left;
+				while (node->right != NULL) {
+					node = node->right;
+				}
+				return node->value;
+			}
+			break;
+		}
+		BSTNode *left = node->left, *right = node->right;
+		// sorry
+		node = reinterpret_cast<BSTNode *>((reinterpret_cast<uintptr_t>(left)) ^
+				(((reinterpret_cast<uintptr_t>(right)) ^
+				  (reinterpret_cast<uintptr_t>(left)))
+				  & -(needle > currVal)));
+		possPred = possPred ^ ((currVal ^ possPred) & -((possPred < currVal) & (currVal < needle)));
+	}
+	return possPred;
 }
