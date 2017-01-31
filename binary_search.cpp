@@ -54,11 +54,18 @@ int pred(int *hay, int needle) {
 		int straw = hay[mid];
 		// if (straw == needle) return hay[mid-1];
 		found = straw == needle;
-		(straw < needle) ? low = mid+1 : high = mid-1;
+		// (straw < needle) ? low = mid+1 : high = mid-1;
+		// if condition is true we get an all 1 bit int else we get an all 0
+		// if we have an all 1 we xor twice, giving the same result back
+		// if we have an all 0 we xor with 0 giving the same result back
+		low  = low  ^ (((mid+1) ^ low)  & -(straw <  needle));
+		high = high ^ (((mid-1) ^ high) & -(straw >= needle));
 	}
 	/* needle is not present, so we should return smallest number less than
 	 * After searching we have either found the smallest number larger than or
 	 * the largest smaller number, and we return the largest smaller value
 	 */
-	return (hay[mid] < needle) ? hay[mid] : hay[mid-1];
+	// return (hay[mid] < needle) ? hay[mid] : hay[mid-1];
+	int result = hay[mid] ^ (((hay[mid-1]) ^ hay[mid]) & -(hay[mid] < needle));
+	return result;
 }
