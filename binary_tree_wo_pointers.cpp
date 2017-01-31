@@ -82,12 +82,11 @@ bool binaryTreeSearch(int *tree, int needle) {
 	return false;
 }
 
-// Optimize to not use stack
 int getPred(int *tree, int needle) {
-	int pos = 1;
-	stack<int> visitedVals;
+	int pos = 1, possPred = -1;
 	while (pos < N) {
-		if (tree[pos] == needle) {
+		int currVal = tree[pos];
+		if (currVal == needle) {
 			// no left subtree
 			if (pos*2 >= N) break;
 			pos = pos*2;
@@ -96,20 +95,12 @@ int getPred(int *tree, int needle) {
 				pos = pos*2+1;
 			}
 			return tree[pos];
-
 		}
-		visitedVals.push(tree[pos]);
+		// save tree[pos] as possible pred if it is greater than previous parent and smaller than needle
+		possPred = possPred ^ ((currVal ^ possPred) & -((possPred < currVal) & (currVal < needle)));
 		// pos = (needle < tree[pos]) ? 2*pos : 2*pos+1;
 		int left = 2*pos, right = 2*pos+1;
-		pos = left ^ ((right ^ left) & -(needle > tree[pos]));
+		pos = left ^ ((right ^ left) & -(needle > currVal));
 	}
-	while (!visitedVals.empty()) {
-		int val = visitedVals.top();
-		// stupid c++
-		visitedVals.pop();
-		if (val < needle) {
-			return val;
-		}
-	}
-	return -1;
+	return possPred;
 }
