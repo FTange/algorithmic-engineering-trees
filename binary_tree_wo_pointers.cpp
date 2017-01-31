@@ -76,7 +76,8 @@ bool binaryTreeSearch(int *tree, int needle) {
 	int pos = 1;
 	while (pos < N) {
 		if (tree[pos] == needle) return true;
-		pos = (needle < tree[pos]) ? 2*pos : 2*pos+1;
+		int left = 2*pos, right = 2*pos+1;
+		pos = left ^ ((right ^ left) & -(needle > tree[pos]));
 	}
 	return false;
 }
@@ -98,7 +99,9 @@ int getPred(int *tree, int needle) {
 
 		}
 		visitedVals.push(tree[pos]);
-		pos = (needle < tree[pos]) ? 2*pos : 2*pos+1;
+		// pos = (needle < tree[pos]) ? 2*pos : 2*pos+1;
+		int left = 2*pos, right = 2*pos+1;
+		pos = left ^ ((right ^ left) & -(needle > tree[pos]));
 	}
 	while (!visitedVals.empty()) {
 		int val = visitedVals.top();
