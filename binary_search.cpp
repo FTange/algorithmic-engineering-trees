@@ -48,11 +48,12 @@ bool binarySearch(int *hay, int needle) {
 }
 
 int pred(int *hay, int needle) {
-	int low = 0, high = N-1, mid;
-	while (low <= high) {
+	int low = 0, high = N-1, mid, found = 0;
+	while (!found && low <= high) {
 		mid = (high + low) / 2;
 		int straw = hay[mid];
-		if (straw == needle) return hay[mid-1];
+		// if (straw == needle) return hay[mid-1];
+		found = straw == needle;
 		(straw < needle) ? low = mid+1 : high = mid-1;
 	}
 	/* needle is not present, so we should return smallest number less than
