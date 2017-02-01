@@ -5,7 +5,8 @@
 using namespace std;
 
 // tree contains N-1 values
-#define N 16
+#define N 15
+#define H 4
 #define R 1.5
 
 void constructSkewedBFS(int *arr, int *tree, double skew);
@@ -16,11 +17,11 @@ bool binaryBFSSearch(int *tree, int needle);
 int  getBFSPred(int *tree, int needle);
 
 void constructSkewedDFS(int *arr, int *tree, double skew);
-void constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high);
+int  constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high);
 void printDFSInorder(int *tree);
-void printDFSInorder(int *tree, int pos);
-bool binaryDFSSearch(int *tree, int needle);
-int  getDFSPred(int *tree, int needle);
+void printDFSInorder(int *tree, int pos, int level);
+bool binaryDFSSearch(int *tree, int needle, int level);
+int  getDFSPred(int *tree, int needle, int level);
 
 int main() {
 	// tree array begins at position 1 for simplicity
@@ -29,13 +30,14 @@ int main() {
 
 	/* Creates a sorted array with gaps between elements depending on R */
 	for (int i=0, val = 0; i < N; val++) {
-		(rand() < thres) ? hay[i++] = val : val++;
-		// hay[i] = i;
-		// i++;
+		//(rand() < thres) ? hay[i++] = val : val++;
+		hay[i] = i;
+		i++;
 	}
 
-	constructSkewedBFS(hay, tree, 0.5);
-
+	constructSkewedDFS(hay, tree, 0.5);
+	printDFSInorder(tree);
+	
 	// printBFSInorder(tree);
 
 	/*
@@ -45,8 +47,8 @@ int main() {
 	*/
 	for (int i=0; i<hay[N-1]; i++) {
 		//cout << tree[i] << " has position " << i << endl;
-		cout << "pred of " << i << " is " << getBFSPred(tree, i) << ", " << i << " is " 
-			<< ((binaryBFSSearch(tree, i)) ? "" : "not ") << "present in tree" << endl;
+		cout  << "pred of " << i << " is " << getDFSPred(tree, i, H) << ", " << i << " is " 
+			<< ((binaryDFSSearch(tree, i, H)) ? "" : "not ") << "present in tree" << endl;
 	}
 }
 
@@ -117,27 +119,66 @@ int getBFSPred(int *tree, int needle) {
 // DFS functions
 
 void constructSkewedDFS(int *arr, int *tree, double skew) {
-	// TODO
+	constructSkewedDFS(arr, tree, skew, 0,0,N-1);
 }
 
-void constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high) {
-	// TODO
+// start with mid being the highest power of 2 larger than N/2
+// works with N being a power of 2 -1
+int constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high) {
+	if (low <= high) {
+		int mid = (low + high) * skew;
+
+		tree[pos] = arr[mid];
+		int sizeLeftTree  = constructSkewedDFS(arr, tree, skew, pos+1, low, mid-1);
+		int sizeRightTree = constructSkewedDFS(arr, tree, skew, pos+sizeLeftTree+1, mid+1, high);
+		return sizeLeftTree + sizeRightTree + 1;
+	}
+	return 0;
 }
 
 void printDFSInorder(int *tree) {
-	// TODO
+	printDFSInorder(tree, 0, H);
 }
 
-void printDFSInorder(int *tree, int pos) {
-	// TODO
+void printDFSInorder(int *tree, int pos, int level) {
+	if (level > 0) {
+		printDFSInorder(tree, pos+1, level - 1);
+		cout << tree[pos] << " has position " << pos << endl;
+		printDFSInorder(tree, pos+ (1 << (level-1)), level - 1);
+	}
 }
 
-bool binaryDFSSearch(int *tree, int needle) {
-	// TODO
+bool binaryDFSSearch(int *tree, int needle, int level) {
+	int pos = 0;
+	while (level > 0) {
+		if (tree[pos] == needle) return true;
+		int left = pos+1, right = pos + (1 << (level-1));
+		pos = left ^ ((right ^ left) & -(needle < tree[pos]));
+	}
 	return false;
 }
 
-int getDFSPred(int *tree, int needle) {
-	// TODO
-	return 0;
+int getDFSPred(int *tree, int needle, int level) {
+	int pos = 0, possPred = -1;
+	while (level > 0) {
+		int currVal = tree[pos];
+		if (currVal == needle) {
+			// no left subtree
+			if ((level -= 1) == 0) { break; }
+			pos = pos+1;
+			// when one we are at leaf nodes
+			while (level > 1) { 
+				pos += (1 << (level-1));
+				level--;
+			}
+			return tree[pos];
+		}
+		// save tree[pos] as possible pred if it is greater than previous parent and smaller than needle
+		possPred = possPred ^ ((currVal ^ possPred) & -((possPred < currVal) & (currVal < needle)));
+		// pos = (needle < tree[pos]) ? 2*pos : 2*pos+1;
+		int left = pos+1, right = pos+(1 << (level-1));
+		pos = left ^ ((right ^ left) & -(needle > tree[pos]));
+		level--;
+	}
+	return possPred;
 }
