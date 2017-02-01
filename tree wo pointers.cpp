@@ -8,12 +8,19 @@ using namespace std;
 #define N 16
 #define R 1.5
 
-void printBSTInorder(int *tree);
-void printBSTInorder(int *tree, int pos);
-bool binaryTreeSearch(int *tree, int needle);
-void constructSkewedBST(int *arr, int *tree, double skew);
-void constructSkewedBST(int *arr, int *tree, double skew, int pos, int low, int high);
-int getPred(int *tree, int needle);
+void constructSkewedBFS(int *arr, int *tree, double skew);
+void constructSkewedBFS(int *arr, int *tree, double skew, int pos, int low, int high);
+void printBFSInorder(int *tree);
+void printBFSInorder(int *tree, int pos);
+bool binaryBFSSearch(int *tree, int needle);
+int  getBFSPred(int *tree, int needle);
+
+void constructSkewedDFS(int *arr, int *tree, double skew);
+void constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high);
+void printDFSInorder(int *tree);
+void printDFSInorder(int *tree, int pos);
+bool binaryDFSSearch(int *tree, int needle);
+int  getDFSPred(int *tree, int needle);
 
 int main() {
 	// tree array begins at position 1 for simplicity
@@ -27,52 +34,54 @@ int main() {
 		// i++;
 	}
 
-	constructSkewedBST(hay, tree, 0.5);
+	constructSkewedBFS(hay, tree, 0.5);
 
-	// printBSTInorder(tree);
+	// printBFSInorder(tree);
 
 	/*
 	for (int i=0; i<N; i++) {
-		cout << i << " is " << (binaryTreeSearch(root,i) ? "" : " not ") << "present" << endl;
+		cout << i << " is " << (binaryBFSSearch(root,i) ? "" : " not ") << "present" << endl;
 	}
 	*/
 	for (int i=0; i<hay[N-1]; i++) {
 		//cout << tree[i] << " has position " << i << endl;
-		cout << "pred of " << i << " is " << getPred(tree, i) << ", " << i << " is " 
-			<< ((binaryTreeSearch(tree, i)) ? "" : "not ") << "present in tree" << endl;
+		cout << "pred of " << i << " is " << getBFSPred(tree, i) << ", " << i << " is " 
+			<< ((binaryBFSSearch(tree, i)) ? "" : "not ") << "present in tree" << endl;
 	}
 }
 
-void constructSkewedBST(int *arr, int *tree, double skew) {
-	constructSkewedBST(arr, tree, skew, 1,0,N-1);
+void constructSkewedBFS(int *arr, int *tree, double skew) {
+	constructSkewedBFS(arr, tree, skew, 1,0,N-1);
 }
 
 /*
  * Double 0 <= skew <= 1 is the proportion of the tree put in left subtree
+ * Not filled from left to right, middle should start with largest power of 2
+ * smaller than or equal to N/2
  */
-void constructSkewedBST(int *arr, int *tree, double skew, int pos, int low, int high) {
+void constructSkewedBFS(int *arr, int *tree, double skew, int pos, int low, int high) {
 	if (low <= high) {
 		int mid = (low + high) * skew;
 
 		tree[pos] = arr[mid];
-		constructSkewedBST(arr, tree, skew, 2*pos, low, mid-1);
-		constructSkewedBST(arr, tree, skew, 2*pos+1, mid+1, high);
+		constructSkewedBFS(arr, tree, skew, 2*pos, low, mid-1);
+		constructSkewedBFS(arr, tree, skew, 2*pos+1, mid+1, high);
 	}
 }
 
-void printBSTInorder(int *tree) {
-	printBSTInorder(tree, 1);
+void printBFSInorder(int *tree) {
+	printBFSInorder(tree, 1);
 }
 
-void printBSTInorder(int *tree, int pos) {
+void printBFSInorder(int *tree, int pos) {
 	if (pos < N) {
-		printBSTInorder(tree, 2*pos);
+		printBFSInorder(tree, 2*pos);
 		cout << tree[pos] << " has position " << pos << endl;
-		printBSTInorder(tree, 2*pos+1);
+		printBFSInorder(tree, 2*pos+1);
 	}
 }
 
-bool binaryTreeSearch(int *tree, int needle) {
+bool binaryBFSSearch(int *tree, int needle) {
 	int pos = 1;
 	while (pos < N) {
 		if (tree[pos] == needle) return true;
@@ -82,7 +91,7 @@ bool binaryTreeSearch(int *tree, int needle) {
 	return false;
 }
 
-int getPred(int *tree, int needle) {
+int getBFSPred(int *tree, int needle) {
 	int pos = 1, possPred = -1;
 	while (pos < N) {
 		int currVal = tree[pos];
@@ -103,4 +112,32 @@ int getPred(int *tree, int needle) {
 		pos = left ^ ((right ^ left) & -(needle > currVal));
 	}
 	return possPred;
+}
+
+// DFS functions
+
+void constructSkewedDFS(int *arr, int *tree, double skew) {
+	// TODO
+}
+
+void constructSkewedDFS(int *arr, int *tree, double skew, int pos, int low, int high) {
+	// TODO
+}
+
+void printDFSInorder(int *tree) {
+	// TODO
+}
+
+void printDFSInorder(int *tree, int pos) {
+	// TODO
+}
+
+bool binaryDFSSearch(int *tree, int needle) {
+	// TODO
+	return false;
+}
+
+int getDFSPred(int *tree, int needle) {
+	// TODO
+	return 0;
 }
