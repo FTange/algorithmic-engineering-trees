@@ -147,47 +147,6 @@ BSTNode *largestSubTreeNode(BSTNode *node) {
 	return node;
 }
 
-/*
- * Iterative version of pred
- * Since pred might be a parent we need them and we can't retreive them since
- * the pointers are one-way, so thay are saved on a stack and if pred is not in
- * the left subtree then we find it in the stack.
- */
-/*
-BSTNode *getPred(BSTNode *node, int needle) {
-	stack<BSTNode *> visitedNodes;
-	while (node != NULL) {
-		if (needle == node->value) {
-			if (node->left != NULL) {
-				node = node->left;
-				while (node->right != NULL) {
-					node = node->right;
-					}
-				return node;
-			}
-			break;
-		}
-		if (needle < node->value) {
-			visitedNodes.push(node);
-			node = node->left;
-		}
-		else {
-			visitedNodes.push(node);
-			node = node->right;
-		}
-	}
-	while (!visitedNodes.empty()) {
-		node = visitedNodes.top();
-		// stupid c++
-		visitedNodes.pop();
-		if (node->value < needle) {
-			return node;
-		}
-	}
-	return NULL;
-}
-*/
-
 int getPred(BSTNode *node, int needle) {
 	int possPred = -1;
 	while (node != NULL) {
@@ -204,6 +163,7 @@ int getPred(BSTNode *node, int needle) {
 		}
 		BSTNode *left = node->left, *right = node->right;
 		// sorry
+		// Assigns node to the left or right node without branching
 		node = reinterpret_cast<BSTNode *>((reinterpret_cast<uintptr_t>(left)) ^
 				(((reinterpret_cast<uintptr_t>(right)) ^
 				  (reinterpret_cast<uintptr_t>(left)))
