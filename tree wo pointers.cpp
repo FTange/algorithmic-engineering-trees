@@ -1,12 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <stack>
+#include "tree.txt"
 
 using namespace std;
 
 // tree contains N-1 values
-#define N 15
-#define H 4
 #define R 1.5
 
 void constructSkewedBFS(int *arr, int *tree, double skew);
@@ -23,35 +22,30 @@ void printDFSInorder(int *tree, int pos, int level);
 bool binaryDFSSearch(int *tree, int needle, int level);
 int  getDFSPred(int *tree, int needle, int level);
 
-int main() {
-	// tree array begins at position 1 for simplicity
-	int hay[N], tree[N+1];
-	int thres = RAND_MAX / R;
-
-	/* Creates a sorted array with gaps between elements depending on R */
-	for (int i=0, val = 0; i < N; val++) {
-		//(rand() < thres) ? hay[i++] = val : val++;
-		hay[i] = i;
-		i++;
+int main(int argc, char *argv[]) {
+	N = initialize();
+	if (bfs) {
+		printBFSInorder(tree);
+	} else {
+		printDFSInorder(tree);
 	}
-
-	constructSkewedDFS(hay, tree, 0.5);
-	printDFSInorder(tree);
-	
-	// printBFSInorder(tree);
+	cout << "N is " << N << " H is " << H << endl;
 
 	/*
 	for (int i=0; i<N; i++) {
-		cout << i << " is " << (binaryBFSSearch(root,i) ? "" : " not ") << "present" << endl;
+		//cout << tree[i] << " has position " << i << endl;
+		cout  << "pred of " << i << " is " << getBFSPred(tree, i) << ", " << i << " is " 
+			<< ((binaryBFSSearch(tree, i)) ? "" : "not ") << "present in tree" << endl;
 	}
 	*/
-	for (int i=0; i<hay[N-1]; i++) {
-		//cout << tree[i] << " has position " << i << endl;
-		cout  << "pred of " << i << " is " << getDFSPred(tree, i, H) << ", " << i << " is " 
-			<< ((binaryDFSSearch(tree, i, H)) ? "" : "not ") << "present in tree" << endl;
-	}
 }
 
+/*
+ * TODO - make function to either save array or c++ instruction to construct array to
+ *		  a file instead of constructing it at runtime
+ *		  https://stackoverflow.com/questions/410980/include-a-text-file-in-a-c-program-as-a-char
+ *		  https://stackoverflow.com/questions/11409021/c-program-sees-an-included-txt-file-as-code
+ */
 void constructSkewedBFS(int *arr, int *tree, double skew) {
 	constructSkewedBFS(arr, tree, skew, 1,0,N-1);
 }
@@ -76,7 +70,7 @@ void printBFSInorder(int *tree) {
 }
 
 void printBFSInorder(int *tree, int pos) {
-	if (pos < N) {
+	if (pos <= N) {
 		printBFSInorder(tree, 2*pos);
 		cout << tree[pos] << " has position " << pos << endl;
 		printBFSInorder(tree, 2*pos+1);
