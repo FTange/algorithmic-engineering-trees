@@ -2,3 +2,6 @@
 *.swp
 arch
 a.out
+tree.txt
+pcm
+.DS_Store

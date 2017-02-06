@@ -40,12 +40,6 @@ int main(int argc, char *argv[]) {
 	*/
 }
 
-/*
- * TODO - make function to either save array or c++ instruction to construct array to
- *		  a file instead of constructing it at runtime
- *		  https://stackoverflow.com/questions/410980/include-a-text-file-in-a-c-program-as-a-char
- *		  https://stackoverflow.com/questions/11409021/c-program-sees-an-included-txt-file-as-code
- */
 void constructSkewedBFS(int *arr, int *tree, double skew) {
 	constructSkewedBFS(arr, tree, skew, 1,0,N-1);
 }
